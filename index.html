@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        /* CSS Variables for theming */
+        :root {
+            --bg-gradient-start: #667eea;
+            --bg-gradient-end: #764ba2;
+            --container-bg: #ffffff;
+            --container-shadow: rgba(0, 0, 0, 0.3);
+            --title-color: #333333;
+            --text-color: #555555;
+            --cell-bg: #f8f9fa;
+            --cell-hover-bg: #e9ecef;
+            --status-bg: #f8f9fa;
+            --disabled-cell-bg: #e9ecef;
+            --x-color: #3498db;
+            --o-color: #e74c3c;
+            --x-bg: rgba(52, 152, 219, 0.15);
+            --o-bg: rgba(231, 76, 60, 0.15);
+            --winner-bg-start: #d4edda;
+            --winner-bg-end: #c3e6cb;
+            --winner-text: #155724;
+            --draw-bg-start: #fff3cd;
+            --draw-bg-end: #ffeeba;
+            --draw-text: #856404;
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] {
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-end: #16213e;
+            --container-bg: #0f0f23;
+            --container-shadow: rgba(0, 0, 0, 0.5);
+            --title-color: #e4e4e7;
+            --text-color: #a1a1aa;
+            --cell-bg: #1e1e3f;
+            --cell-hover-bg: #2a2a4a;
+            --status-bg: #1e1e3f;
+            --disabled-cell-bg: #252545;
+            --x-color: #60a5fa;
+            --o-color: #f87171;
+            --x-bg: rgba(96, 165, 250, 0.2);
+            --o-bg: rgba(248, 113, 113, 0.2);
+            --winner-bg-start: #064e3b;
+            --winner-bg-end: #065f46;
+            --winner-text: #6ee7b7;
+            --draw-bg-start: #78350f;
+            --draw-bg-end: #92400e;
+            --draw-text: #fcd34d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            transition: background 0.4s ease;
+        }
+
+        .game-container {
+            background: var(--container-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px var(--container-shadow);
+            text-align: center;
+            transition: background 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 50px;
+            height: 26px;
+            background: #e2e8f0;
+            border: 2px solid #cbd5e1;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-color: #94a3b8;
+        }
+
+        /* Dark mode toggle styling */
+        [data-theme="dark"] .theme-toggle {
+            background: var(--cell-bg);
+            border-color: #3b3b5c;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] .theme-toggle:hover {
+            border-color: #5b5b8c;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-toggle-slider {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            border-radius: 50%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] .theme-toggle-slider {
+            transform: translateX(24px);
+        }
+
+        .theme-toggle-icon {
+            color: white;
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        h1 {
+            color: var(--title-color);
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            transition: color 0.4s ease;
+        }
+
+        .status {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: var(--text-color);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: var(--status-bg);
+            transition: all 0.3s ease;
+        }
+
+        .status .player-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .status .player-mark.x {
+            background: var(--x-bg);
+            color: var(--x-color);
+        }
+
+        .status .player-mark.o {
+            background: var(--o-bg);
+            color: var(--o-color);
+        }
+
+        .status.winner {
+            background: linear-gradient(135deg, var(--winner-bg-start) 0%, var(--winner-bg-end) 100%);
+            color: var(--winner-text);
+            font-weight: bold;
+            font-size: 1.5rem;
+            animation: celebrateStatus 0.6s ease-out;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .status.winner .player-mark {
+            animation: bounce 0.5s ease infinite alternate;
+        }
+
+        .status.draw {
+            background: linear-gradient(135deg, var(--draw-bg-start) 0%, var(--draw-bg-end) 100%);
+            color: var(--draw-text);
+            font-weight: bold;
+            font-size: 1.5rem;
+            animation: shakeStatus 0.5s ease-out;
+            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+        }
+
+        @keyframes celebrateStatus {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shakeStatus {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
+        .status-icon {
+            font-size: 1.8rem;
+            margin-right: 5px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            margin: 0 auto 30px;
+            transition: all 0.3s ease;
+        }
+
+        .board.disabled {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .board.disabled .cell:not(.winning) {
+            background: var(--disabled-cell-bg);
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background: var(--cell-bg);
+            border: none;
+            border-radius: 10px;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Hover preview for empty cells */
+        .cell:not(.taken)::after {
+            content: attr(data-hover);
+            position: absolute;
+            font-size: 3rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .board.turn-x .cell:not(.taken)::after {
+            content: 'X';
+            color: var(--x-color);
+            opacity: 0;
+        }
+
+        .board.turn-o .cell:not(.taken)::after {
+            content: 'O';
+            color: var(--o-color);
+            opacity: 0;
+        }
+
+        .cell:not(.taken):hover::after {
+            opacity: 0.4;
+        }
+
+        .cell:not(.taken):hover {
+            background: var(--cell-hover-bg);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .board.turn-x .cell:not(.taken):hover {
+            background: var(--x-bg);
+            border: 2px solid var(--x-color);
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        .board.turn-o .cell:not(.taken):hover {
+            background: var(--o-bg);
+            border: 2px solid var(--o-color);
+            border-color: rgba(248, 113, 113, 0.3);
+        }
+
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        .cell.x {
+            color: var(--x-color);
+        }
+
+        .cell.o {
+            color: var(--o-color);
+        }
+
+        .cell.winning {
+            background: linear-gradient(135deg, var(--winner-bg-start) 0%, var(--winner-bg-end) 100%);
+            animation: pulse 0.5s ease-in-out;
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .restart-btn {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .restart-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+            background-position: 100% 0;
+            animation: gradientShift 2s ease infinite;
+        }
+
+        .restart-btn:hover::before {
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+        }
+
+        .restart-btn:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .restart-btn.clicked {
+            animation: buttonClick 0.4s ease;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes buttonClick {
+            0% { transform: scale(1); }
+            25% { transform: scale(0.95); }
+            50% { transform: scale(1.05); }
+            75% { transform: scale(0.98); }
+            100% { transform: scale(1); }
+        }
+
+        /* Ripple effect */
+        .restart-btn .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: rippleEffect 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Focus state for accessibility */
+        .restart-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.5), 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Disabled state for restart button */
+        .restart-btn:disabled {
+            background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .restart-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+            animation: none;
+        }
+
+        .restart-btn:disabled::before {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <span class="theme-toggle-slider">
+                <span class="theme-toggle-icon" id="themeIcon">☀️</span>
+            </span>
+        </button>
+        <h1>Tic-Tac-Toe</h1>
+        <div class="status" id="status">
+            <span class="player-mark x">X</span>
+            <span>Player X's turn</span>
+        </div>
+        <div class="board" id="board">
+            <button class="cell" data-index="0"></button>
+            <button class="cell" data-index="1"></button>
+            <button class="cell" data-index="2"></button>
+            <button class="cell" data-index="3"></button>
+            <button class="cell" data-index="4"></button>
+            <button class="cell" data-index="5"></button>
+            <button class="cell" data-index="6"></button>
+            <button class="cell" data-index="7"></button>
+            <button class="cell" data-index="8"></button>
+        </div>
+        <button class="restart-btn" id="restartBtn" disabled>Restart Game</button>
+    </div>
+
+    <script>
+        // Game state
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+
+        // Winning combinations (indices)
+        const winningCombinations = [
+            [0, 1, 2], // Top row
+            [3, 4, 5], // Middle row
+            [6, 7, 8], // Bottom row
+            [0, 3, 6], // Left column
+            [1, 4, 7], // Middle column
+            [2, 5, 8], // Right column
+            [0, 4, 8], // Diagonal top-left to bottom-right
+            [2, 4, 6]  // Diagonal top-right to bottom-left
+        ];
+
+        // DOM elements
+        const cells = document.querySelectorAll('.cell');
+        const statusDisplay = document.getElementById('status');
+        const restartBtn = document.getElementById('restartBtn');
+        const boardElement = document.getElementById('board');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+
+        // Initialize board turn indicator
+        boardElement.classList.add('turn-x');
+
+        // Theme handling
+        let isDarkTheme = false;
+
+        // Check for saved theme preference or system preference
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('ticTacToeTheme');
+            if (savedTheme) {
+                isDarkTheme = savedTheme === 'dark';
+            } else {
+                // Check system preference
+                isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            }
+            applyTheme();
+        }
+
+        function applyTheme() {
+            if (isDarkTheme) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '🌙';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                themeIcon.textContent = '☀️';
+            }
+        }
+
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            applyTheme();
+            localStorage.setItem('ticTacToeTheme', isDarkTheme ? 'dark' : 'light');
+        }
+
+        // Initialize theme on page load
+        initializeTheme();
+
+        // Theme toggle event listener
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Handle cell click
+        function handleCellClick(event) {
+            const cell = event.target;
+            const index = parseInt(cell.dataset.index);
+
+            // Ignore if cell is taken or game is over
+            if (board[index] !== '' || !gameActive) {
+                return;
+            }
+
+            // Update board state
+            board[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add('taken', currentPlayer.toLowerCase());
+
+            // Enable restart button after first move
+            if (restartBtn.disabled) {
+                restartBtn.disabled = false;
+            }
+
+            // Check for win or draw
+            if (checkWin()) {
+                gameActive = false;
+                updateStatus('win');
+                highlightWinningCells();
+                disableBoard();
+            } else if (checkDraw()) {
+                gameActive = false;
+                updateStatus('draw');
+                disableBoard();
+            } else {
+                // Switch player
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                updateStatus('turn');
+                updateBoardTurn();
+            }
+        }
+
+        // Check for a win
+        function checkWin() {
+            return winningCombinations.some(combination => {
+                return combination.every(index => {
+                    return board[index] === currentPlayer;
+                });
+            });
+        }
+
+        // Get the winning combination
+        function getWinningCombination() {
+            return winningCombinations.find(combination => {
+                return combination.every(index => {
+                    return board[index] === currentPlayer;
+                });
+            });
+        }
+
+        // Highlight winning cells
+        function highlightWinningCells() {
+            const winningCombo = getWinningCombination();
+            if (winningCombo) {
+                winningCombo.forEach(index => {
+                    cells[index].classList.add('winning');
+                });
+            }
+        }
+
+        // Update board turn indicator for hover effects
+        function updateBoardTurn() {
+            boardElement.classList.remove('turn-x', 'turn-o');
+            boardElement.classList.add(currentPlayer === 'X' ? 'turn-x' : 'turn-o');
+        }
+
+        // Disable board after game ends
+        function disableBoard() {
+            boardElement.classList.add('disabled');
+        }
+
+        // Enable board for new game
+        function enableBoard() {
+            boardElement.classList.remove('disabled');
+            updateBoardTurn();
+        }
+
+        // Check for a draw
+        function checkDraw() {
+            return board.every(cell => cell !== '');
+        }
+
+        // Update status display
+        function updateStatus(type) {
+            statusDisplay.classList.remove('winner', 'draw');
+            const playerClass = currentPlayer.toLowerCase();
+            
+            if (type === 'turn') {
+                statusDisplay.innerHTML = `
+                    <span class="player-mark ${playerClass}">${currentPlayer}</span>
+                    <span>Player ${currentPlayer}'s turn</span>
+                `;
+            } else if (type === 'win') {
+                statusDisplay.classList.add('winner');
+                statusDisplay.innerHTML = `
+                    <span class="status-icon">🎉</span>
+                    <span class="player-mark ${playerClass}">${currentPlayer}</span>
+                    <span>Player ${currentPlayer} wins!</span>
+                    <span class="status-icon">🏆</span>
+                `;
+            } else if (type === 'draw') {
+                statusDisplay.classList.add('draw');
+                statusDisplay.innerHTML = `
+                    <span class="status-icon">🤝</span>
+                    <span>It's a draw!</span>
+                    <span class="status-icon">🤝</span>
+                `;
+            }
+        }
+
+        // Restart the game
+        function restartGame() {
+            // Reset game state
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            
+            // Reset status display
+            updateStatus('turn');
+            
+            // Reset board
+            enableBoard();
+            boardElement.classList.remove('turn-o');
+            boardElement.classList.add('turn-x');
+
+            // Reset all cells - remove all possible classes and content
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('taken', 'x', 'o', 'winning');
+                // Reset any inline styles that might have been added
+                cell.style.cssText = '';
+            });
+
+            // Disable restart button until a move is made
+            restartBtn.disabled = true;
+        }
+
+        // Create ripple effect on button click
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const rect = button.getBoundingClientRect();
+            
+            // Remove any existing ripples
+            const existingRipple = button.querySelector('.ripple');
+            if (existingRipple) {
+                existingRipple.remove();
+            }
+            
+            // Create new ripple
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+            
+            button.appendChild(ripple);
+            
+            // Add clicked animation class
+            button.classList.add('clicked');
+            
+            // Remove ripple and class after animation
+            setTimeout(() => {
+                ripple.remove();
+                button.classList.remove('clicked');
+            }, 600);
+        }
+
+        // Event listeners
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+
+        restartBtn.addEventListener('click', (event) => {
+            createRipple(event);
+            restartGame();
+        });
+    </script>
+</body>
+</html>
