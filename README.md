@@ -15,16 +15,34 @@ A web-based Tic-Tac-Toe game built with plain HTML, CSS, and JavaScript (no fram
 - Animated win celebration and draw notifications
 - Responsive and modern UI design
 
+## Running Locally
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/alexandralheureuxECE/lab-1-gel-trackunit.git
+   ```
+2. Navigate to the project folder:
+   ```bash
+   cd lab-1-gel-trackunit
+   ```
+3. Open `index.html` in your web browser:
+   - Double-click the file, or
+   - Run `open index.html` (macOS) / `start index.html` (Windows)
+
+No dependencies or build steps required - it's plain HTML, CSS, and JavaScript.
+
 ## How to Play
 
-1. Open `index.html` in any web browser
-2. Player X goes first - click any cell to place your mark
-3. Players alternate turns until someone wins or it's a draw
-4. Click "Restart Game" to play again
+1. Player X goes first - click any cell to place your mark
+2. Players alternate turns until someone wins or it's a draw
+3. Click "Restart Game" to play again
+4. Use the toggle in the top-right corner to switch between light and dark themes
 
 ## LLM Tool Disclosure
 
 **Tool name(s):** Cursor, ChatGPT
 
 Cursor was used as the primary LLM-assisted development environment to generate and refine the Tic-Tac-Toe application. ChatGPT was used for documentation clarity.
+
+## GitHub Pages URL: https://alexandralheureuxece.github.io/lab-1-gel-trackunit/
 
